@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para o meu amor</title>
+    
+    <!-- COLE O SCRIPT DE PROTEÇÃO AQUI -->
+    <script>
+        // 1. Bloqueia o clique com o botão direito (Menu de Contexto)
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // 2. Bloqueia atalhos de teclado comuns de desenvolvedores
+        document.addEventListener('keydown', function(e) {
+            // Bloqueia F12
+            if (e.key === 'F12' || e.keyCode === 123) {
+                e.preventDefault();
+            }
+            // Bloqueia Ctrl+Shift+I (Inspecionar) / Ctrl+Shift+J (Console) / Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) {
+                e.preventDefault();
+            }
+            // Bloqueia Ctrl+U (Ver código-fonte) e Ctrl+S (Salvar página)
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'S')) {
+                e.preventDefault();
+            }
+        });
+
+        // 3. Bloqueia a seleção de texto e imagens pelo mouse
+        document.onselectstart = function() { return false; };
+    </script>
+    
+    <style>
+        body {
+            background-color: #e6e6fa; 
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; 
+            text-align: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        img {
+            width: 250px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            color: #333333;
+            font-size: 28px;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        p {
+            color: #444444;
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 0 20px;
+            line-height: 1.5;
+            position: relative;
+            z-index: 10;
+        }
+
+        #mensagem-fuga {
+            color: #dc3545;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 25px;
+            margin-bottom: 15px;
+            margin-top: 0;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+            position: relative;
+            z-index: 10;
+        }
+
+        button {
+            font-size: 20px;
+            font-weight: bold;
+            padding: 12px 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        #btn-yes {
+            background-color: #28a745; 
+            color: white;
+        }
+
+        #btn-yes:hover {
+            transform: scale(1.1); 
+        }
+
+        #btn-no {
+            background-color: #dc3545; 
+            color: white;
+            position: relative; 
+        }
+
+        #confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .confetti, .heart {
+            position: absolute;
+            top: -10vh;
+            animation: fall linear forwards;
+        }
+
+        .heart {
+            font-size: 24px;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÚSICA INVISÍVEL -->
+    <audio id="musica-fundo" loop>
+        <source src="Seu olhar vai na rua.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="question-container">
+        <img src="https://i.ibb.co/R4bQmkZX/urso.gif" alt="Ursinho fofo">
+        
+        <h1>Você aceita sair comigo Isabela ?</h1>
+        
+        <p id="mensagem-fuga"></p>
+        
+        <div class="buttons">
+            <button id="btn-yes">SIM</button>
+            <button id="btn-no">NÃO</button>
+        </div>
+    </div>
+
+    <div id="success-container" class="hidden">
+        <img src="https://i.ibb.co/8gc7Cpwn/urso2.gif" alt="Ursinhos se abraçando">
+        
+        <h1>EBAAAAAAAA! Prometo que vai ser o melhor roteiro do mundo ❤️</h1>
+        <p>Desde de já aviso que é um roteiro de alta periculosidade, então vai preparada para sorrir</p>
+    </div>
+
+    <div id="confetti-container" class="hidden"></div>
+
+    <script>
+        const btnNo = document.getElementById('btn-no');
+        const btnYes = document.getElementById('btn-yes');
+        const questionContainer = document.getElementById('question-container');
+        const successContainer = document.getElementById('success-container');
+        const confettiContainer = document.getElementById('confetti-container');
+        const mensagemFuga = document.getElementById('mensagem-fuga');
+
+        const frases = [
+            "Tem certeza?",
+            "Pense bem...",
+            "Olha lá, hein!",
+            "Vai clicar mesmo?",
+            "Dá mais uma pensadinha...",
+            "Certeza absoluta?",
+            "Acho que você clicou errado..."
+        ];
+
+        let contadorFugas = 0;
+
+        function fugir() {
+            btnNo.style.position = 'fixed';
+            
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            
+            const buttonWidth = btnNo.offsetWidth;
+            const buttonHeight = btnNo.offsetHeight;
+            
+            const randomX = Math.floor(Math.random() * (windowWidth - buttonWidth));
+            const randomY = Math.floor(Math.random() * (windowHeight - buttonHeight));
+            
+            btnNo.style.left = randomX + 'px';
+            btnNo.style.top = randomY + 'px';
+
+            if (contadorFugas < frases.length) {
+                mensagemFuga.innerText = frases[contadorFugas];
+                contadorFugas++;
+            } else {
+                mensagemFuga.innerText = frases[frases.length - 1];
+            }
+        }
+
+        btnNo.addEventListener('mouseover', fugir);
+        btnNo.addEventListener('touchstart', fugir); 
+
+        btnYes.addEventListener('click', () => {
+            questionContainer.classList.add('hidden');
+            successContainer.classList.remove('hidden');
+            confettiContainer.classList.remove('hidden');
+            iniciarChuva();
+        });
+
+        function iniciarChuva() {
+            setInterval(() => {
+                const el = document.createElement('div');
+                
+                if (Math.random() > 0.5) {
+                    el.classList.add('heart');
+                    el.innerText = Math.random() > 0.5 ? '❤️' : '💖';
+                } else {
+                    el.classList.add('confetti');
+                    const colors = ['#ff0a54', '#ff477e', '#ff7096', '#ff85a1', '#fbb1bd', '#f9bec7', '#ffffff', '#ffd700'];
+                    el.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    el.style.width = (Math.random() * 10 + 5) + 'px';
+                    el.style.height = (Math.random() * 20 + 10) + 'px';
+                }
+
+                el.style.left = Math.random() * 100 + 'vw';
+                el.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                
+                confettiContainer.appendChild(el);
+
+                setTimeout(() => {
+                    el.remove();
+                }, 5000);
+            }, 50); 
+        }
+
+        // --- CÓDIGO QUE FAZ A MÚSICA TOCAR NO PRIMEIRO CLIQUE ---
+        const musicaFundo = document.getElementById('musica-fundo');
+
+        document.body.addEventListener('click', () => {
+            if (musicaFundo.paused) {
+                musicaFundo.play();
+            }
+        }, { once: true });
+    </script>
+</body>
+</html>
